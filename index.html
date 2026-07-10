@@ -3,24 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Search, filter, and explore the current Overwatch hero roster."
+    />
     <title>Overwatch Hero Dashboard</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <a class="skip-link" href="#roster">Skip to hero roster</a>
     <div class="bg-glow bg-glow--left" aria-hidden="true"></div>
     <div class="bg-glow bg-glow--right" aria-hidden="true"></div>
 
     <header class="hero-header">
       <p class="eyebrow">Overwatch Intelligence Hub</p>
       <h1>Hero Dashboard</h1>
-      <p>Browse the full roster, inspect live performance highlights, and drill into hero lore.</p>
+      <p>
+        Explore a searchable roster, filter by role or origin, and open official profiles for
+        verified heroes.
+      </p>
     </header>
 
-    <main class="container">
+    <main class="container" id="main-content">
       <section class="controls" aria-label="Dashboard controls">
         <div class="control-group control-group--search">
           <label for="searchInput">Search heroes</label>
-          <input id="searchInput" type="search" placeholder="Try Tracer, Tank, Support..." />
+          <input
+            id="searchInput"
+            type="search"
+            placeholder="Try Tracer, Tank, Brazil..."
+            autocomplete="off"
+          />
         </div>
 
         <div class="control-group">
@@ -43,19 +56,51 @@
         </div>
 
         <div class="control-group control-group--actions">
-          <label class="visually-hidden" for="resetFilters">Reset filters</label>
-          <button id="resetFilters" type="button">Reset filters</button>
+          <button id="resetFilters" type="button">Reset dashboard</button>
         </div>
       </section>
 
-      <section class="quick-filters" aria-label="Quick role filters">
-        <button class="chip is-active" type="button" data-role="all">All</button>
-        <button class="chip" type="button" data-role="Tank">Tank</button>
-        <button class="chip" type="button" data-role="Damage">Damage</button>
-        <button class="chip" type="button" data-role="Support">Support</button>
+      <div class="quick-filters" role="group" aria-label="Quick role filters">
+        <button class="chip is-active" type="button" data-role="all" aria-pressed="true">
+          All
+        </button>
+        <button class="chip" type="button" data-role="Tank" aria-pressed="false">Tank</button>
+        <button class="chip" type="button" data-role="Damage" aria-pressed="false">
+          Damage
+        </button>
+        <button class="chip" type="button" data-role="Support" aria-pressed="false">
+          Support
+        </button>
+      </div>
+
+      <section class="data-panel" aria-label="Roster data status">
+        <div
+          id="rosterStatus"
+          class="roster-status"
+          data-state="bundled"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <span id="rosterStatusBadge" class="status-badge">Bundled roster</span>
+          <span id="rosterStatusDetail">Loading verified roster details...</span>
+        </div>
+        <a
+          class="source-link"
+          href="https://overwatch.blizzard.com/en-us/heroes/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Official roster <span aria-hidden="true">↗</span>
+          <span class="visually-hidden">(opens in a new tab)</span>
+        </a>
       </section>
 
-      <section class="stats" aria-live="polite">
+      <p class="rate-note">
+        Rate samples are bundled demonstration data, not live competitive statistics.
+      </p>
+
+      <section class="stats" aria-label="Roster summary">
         <article class="stat-card">
           <h2>Total Heroes</h2>
           <p id="totalHeroes">0</p>
@@ -65,8 +110,8 @@
           <p id="shownHeroes">0</p>
         </article>
         <article class="stat-card">
-          <h2>Rates Imported</h2>
-          <p id="heroesWithRates">0</p>
+          <h2>Rate Samples</h2>
+          <p id="rateSamples">0</p>
         </article>
         <article class="stat-card">
           <h2>Selected Hero</h2>
@@ -74,34 +119,60 @@
         </article>
       </section>
 
-      <p id="resultsSummary" class="results-summary" aria-live="polite"></p>
+      <p id="resultsSummary" class="results-summary" role="status" aria-live="polite"></p>
 
-      <section>
-        <h2 class="section-title">Roster</h2>
-        <div id="heroGrid" class="hero-grid"></div>
-      </section>
+      <div class="dashboard-layout">
+        <aside id="heroDetails" class="lore-panel" aria-labelledby="heroIntelTitle">
+          <h2 id="heroIntelTitle" class="section-title">Hero Intel</h2>
+          <article id="loreCard" class="lore-card" aria-live="polite" aria-atomic="true">
+            <h3 id="loreName" tabindex="-1">Select a hero</h3>
+            <p id="loreText">Choose any hero card to view their lore.</p>
+            <p id="loreMeta" class="lore-meta">
+              Role, origin, and sample performance data will appear here.
+            </p>
+            <a
+              id="loreLink"
+              class="lore-link"
+              target="_blank"
+              rel="noopener noreferrer"
+              hidden
+            >
+              Explore the official hero profile <span aria-hidden="true">↗</span>
+              <span class="visually-hidden">(opens in a new tab)</span>
+            </a>
+            <button id="returnToHero" class="return-to-card" type="button" hidden>
+              Return to selected hero in roster
+            </button>
+          </article>
+        </aside>
 
-      <section id="heroDetails" class="lore-panel" aria-live="polite" aria-atomic="true">
-        <h2 class="section-title">Hero Intel</h2>
-        <article id="loreCard" class="lore-card">
-          <h3 id="loreName">Select a hero</h3>
-          <p id="loreText">Click any hero card to view their lore.</p>
-          <p id="loreMeta" class="lore-meta">Role and performance stats will appear here.</p>
-        </article>
-      </section>
+        <section id="roster" aria-labelledby="rosterTitle">
+          <h2 id="rosterTitle" class="section-title" tabindex="-1">Roster</h2>
+          <div id="heroGrid" class="hero-grid"></div>
+        </section>
+      </div>
+
+      <noscript>
+        <p class="empty-state">This dashboard requires JavaScript to filter and display heroes.</p>
+      </noscript>
     </main>
 
+    <footer class="site-footer">
+      Fan-made project. Overwatch and its characters are trademarks of Blizzard Entertainment.
+    </footer>
+
     <template id="heroCardTemplate">
-      <article class="hero-card" tabindex="0" role="button" aria-label="View hero lore">
-        <header>
-          <h3 class="hero-name"></h3>
+      <button class="hero-card" type="button" aria-controls="heroDetails">
+        <span class="hero-card__header">
+          <span class="hero-name"></span>
           <span class="badge hero-role"></span>
-        </header>
-        <p class="hero-origin"></p>
-        <p class="hero-hint">Click to read lore</p>
-      </article>
+        </span>
+        <span class="hero-origin"></span>
+        <span class="hero-hint"></span>
+        <span class="visually-hidden">View hero intel</span>
+      </button>
     </template>
 
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
   </body>
 </html>
