@@ -1,109 +1,35 @@
-const defaultHeroes = [
-  { name: 'D.Va', role: 'Tank', origin: 'South Korea' },
-  { name: 'Doomfist', role: 'Tank', origin: 'Nigeria' },
-  { name: 'Junker Queen', role: 'Tank', origin: 'Australia' },
-  { name: 'Mauga', role: 'Tank', origin: 'Samoa' },
-  { name: 'Orisa', role: 'Tank', origin: 'Nigeria' },
-  { name: 'Ramattra', role: 'Tank', origin: 'Nepal' },
-  { name: 'Reinhardt', role: 'Tank', origin: 'Germany' },
-  { name: 'Roadhog', role: 'Tank', origin: 'Australia' },
-  { name: 'Sigma', role: 'Tank', origin: 'Netherlands' },
-  { name: 'Winston', role: 'Tank', origin: 'Horizon Lunar Colony' },
-  { name: 'Wrecking Ball', role: 'Tank', origin: 'Horizon Lunar Colony' },
-  { name: 'Zarya', role: 'Tank', origin: 'Russia' },
-  { name: 'Ashe', role: 'Damage', origin: 'United States' },
-  { name: 'Bastion', role: 'Damage', origin: 'Germany' },
-  { name: 'Cassidy', role: 'Damage', origin: 'United States' },
-  { name: 'Echo', role: 'Damage', origin: 'Singapore' },
-  { name: 'Genji', role: 'Damage', origin: 'Japan' },
-  { name: 'Hanzo', role: 'Damage', origin: 'Japan' },
-  { name: 'Junkrat', role: 'Damage', origin: 'Australia' },
-  { name: 'Mei', role: 'Damage', origin: 'China' },
-  { name: 'Pharah', role: 'Damage', origin: 'Egypt' },
-  { name: 'Reaper', role: 'Damage', origin: 'United States' },
-  { name: 'Sojourn', role: 'Damage', origin: 'Canada' },
-  { name: 'Soldier: 76', role: 'Damage', origin: 'United States' },
-  { name: 'Sombra', role: 'Damage', origin: 'Mexico' },
-  { name: 'Symmetra', role: 'Damage', origin: 'India' },
-  { name: 'Torbjörn', role: 'Damage', origin: 'Sweden' },
-  { name: 'Tracer', role: 'Damage', origin: 'United Kingdom' },
-  { name: 'Venture', role: 'Damage', origin: 'Canada' },
-  { name: 'Widowmaker', role: 'Damage', origin: 'France' },
-  { name: 'Ana', role: 'Support', origin: 'Egypt' },
-  { name: 'Baptiste', role: 'Support', origin: 'Haiti' },
-  { name: 'Brigitte', role: 'Support', origin: 'Sweden' },
-  { name: 'Illari', role: 'Support', origin: 'Peru' },
-  { name: 'Juno', role: 'Support', origin: 'Mars Colony' },
-  { name: 'Kiriko', role: 'Support', origin: 'Japan' },
-  { name: 'Lifeweaver', role: 'Support', origin: 'Thailand' },
-  { name: 'Lúcio', role: 'Support', origin: 'Brazil' },
-  { name: 'Mercy', role: 'Support', origin: 'Switzerland' },
-  { name: 'Moira', role: 'Support', origin: 'Ireland' },
-  { name: 'Zenyatta', role: 'Support', origin: 'Nepal' }
-];
+import {
+  BUNDLED_ROSTER_VERIFIED,
+  defaultHeroes,
+  heroLore,
+  heroRates
+} from './hero-data.js';
+import { fetchHeroRoster } from './hero-api.js';
+import {
+  filterHeroes,
+  findHeroBySlug,
+  getOfficialHeroUrl,
+  sortHeroes,
+  toHeroSlug
+} from './hero-utils.js';
 
-const heroLore = {
-  'D.Va': 'Hana Song is a former pro gamer who now pilots a state-of-the-art mech to defend South Korea from omnic threats emerging from the sea.',
-  Doomfist: 'Akande Ogundimu believes conflict is the catalyst for human evolution, and he seeks to forge a stronger future through force as a Talon leader.',
-  'Junker Queen': 'Odessa Stone seized control of Junkertown through brutal arena combat and now rules the irradiated outback with charisma and steel.',
-  Mauga: 'A heavy assault specialist from Samoa, Mauga thrives on chaos and destruction while carrying out Talon operations with an intimidating grin.',
-  Orisa: 'Built by Efi Oladele from the remains of OR15 defense bots, Orisa protects Numbani with adaptive intelligence and a steadfast sense of duty.',
-  Ramattra: 'Once a monk advocating peace, Ramattra embraced revolution and formed Null Sector after seeing omnics denied justice and equal rights.',
-  Reinhardt: 'A crusader of honor from Germany, Reinhardt Wilhelm fights with a rocket hammer and unbreakable spirit to protect those who cannot protect themselves.',
-  Roadhog: 'Mako Rutledge became the ruthless enforcer Roadhog after Australia\'s omnium catastrophe, roaming as a masked outlaw from Junkertown.',
-  Sigma: 'Brilliant astrophysicist Siebren de Kuiper was transformed by a gravity experiment gone wrong, leaving Talon to weaponize his fractured genius.',
-  Winston: 'A super-intelligent gorilla from Horizon Lunar Colony, Winston became a scientist and hero inspired by Overwatch\'s ideals of hope.',
-  'Wrecking Ball': 'Hammond, a genetically engineered hamster from the lunar colony, built a mechanized ball and fought his way to freedom in Junkertown.',
-  Zarya: 'Aleksandra Zaryanova is a celebrated Russian soldier who turned her strength toward defending her homeland from omnic invasion.',
-  Ashe: 'Elizabeth Caledonia Ashe leads the Deadlock Gang with sharp aim and sharper ambition, enforcing her own outlaw code in the American Southwest.',
-  Bastion: 'An E54 Bastion unit once built for war, this curious omnic now wanders nature with its bird companion Ganymede, searching for purpose.',
-  Cassidy: 'Cole Cassidy, a former Deadlock gunslinger, now travels the world trying to right wrongs with a revolver and hard-earned resolve.',
-  Echo: 'Created by Dr. Mina Liao, Echo is an advanced adaptive robot designed to learn and evolve while carrying forward Overwatch\'s hopeful mission.',
-  Genji: 'After near-fatal betrayal, Genji Shimada was rebuilt with cybernetics and later found peace through Zenyatta\'s teachings.',
-  Hanzo: 'Heir to the Shimada empire, Hanzo abandoned his clan after a tragic duel and now seeks redemption for his past.',
-  Junkrat: 'Jamison Fawkes is an explosives-obsessed anarchist from the Australian outback who turned accidental treasure into global chaos.',
-  Mei: 'Dr. Mei-Ling Zhou is a climatologist who survived cryostasis in Antarctica and now fights to protect the world\'s future.',
-  Pharah: 'Fareeha Amari serves as a decorated security captain in Raptora armor, striving to honor both her duty and her family legacy.',
-  Reaper: 'Gabriel Reyes, once Overwatch\'s strike commander, became the shadowy mercenary Reaper after being twisted by deathly experiments.',
-  Sojourn: 'Vivian Chase, known as Sojourn, is a disciplined former Overwatch captain whose cybernetic enhancements support precise tactical leadership.',
-  'Soldier: 76': 'The vigilante Soldier: 76 is Jack Morrison, former Overwatch commander, uncovering conspiracies while dispensing justice on his own terms.',
-  Sombra: 'A master hacker from Mexico, Sombra manipulates global powers from the shadows in pursuit of secrets and control.',
-  Symmetra: 'Satya Vaswani, an architect of hard-light technology, seeks to bring order to chaos while questioning the world she helps shape.',
-  Torbjörn: 'Master engineer Torbjörn Lindholm designs powerful weapons systems and fights to ensure technology serves humanity responsibly.',
-  Tracer: 'Lena Oxton, the chronal-jumping Tracer, is an upbeat adventurer who became one of Overwatch\'s most recognizable heroes.',
-  Venture: 'Venture is a daring archeologist and explorer who combines cutting-edge drilling tech with a passion for unearthing hidden history.',
-  Widowmaker: 'Amélie Lacroix was transformed by Talon into the emotionless assassin Widowmaker, using lethal precision from afar.',
-  Ana: 'Ana Amari, one of Overwatch\'s founding members, returned from hiding as a sniper and strategist to protect a new generation.',
-  Baptiste: 'Jean-Baptiste Augustin escaped Talon and now uses his combat medic training to save lives where the world has turned its back.',
-  Brigitte: 'Brigitte Lindholm, a gifted engineer and shield bearer, continues Reinhardt\'s mission of protecting the innocent.',
-  Illari: 'Illari is the last of the Inti Warriors after a solar ritual tragedy, wielding sun-forged power while carrying immense guilt.',
-  Juno: 'Raised in a Mars colony, Juno journeys to Earth as a brilliant young scientist determined to reconnect isolated communities.',
-  Kiriko: 'Kiriko Kamori balances shrine traditions with modern heroism, defending Kanezaka with swift movement and healing ofuda.',
-  Lifeweaver: 'Niran Pruksamanee developed biolight technology to heal and create, using his inventions to protect life in all forms.',
-  'Lúcio': 'Lúcio Correia dos Santos is a musician-activist who amplifies hope and resistance through sound in the streets of Rio.',
-  Mercy: 'Dr. Angela Ziegler, known as Mercy, is a brilliant healer whose medical breakthroughs and compassion save countless lives.',
-  Moira: 'Moira O\'Deorain is a controversial geneticist pursuing scientific advancement without ethical limits under Talon\'s patronage.',
-  Zenyatta: 'Zenyatta is an omnic monk who travels the world to teach harmony between humans and omnics through empathy and mindfulness.'
-};
+const configuredEndpoint = window.OVERWATCH_HERO_API_URL;
+const API_ENDPOINT =
+  typeof configuredEndpoint === 'string' && configuredEndpoint.trim()
+    ? configuredEndpoint.trim()
+    : null;
+const configuredTimeout = Number(window.OVERWATCH_HERO_API_TIMEOUT_MS);
+const API_TIMEOUT_MS = Number.isFinite(configuredTimeout)
+  ? Math.min(Math.max(configuredTimeout, 1000), 20000)
+  : 5000;
 
-const heroRates = {
-  Ana: { winRate: '45.2%', pickRate: '9.2%' },
-  Ashe: { winRate: '51.1%', pickRate: '8.1%' },
-  Baptiste: { winRate: '44.4%', pickRate: '2.7%' },
-  Bastion: { winRate: '50.8%', pickRate: '11%' },
-  Brigitte: { winRate: '52.2%', pickRate: '2.2%' },
-  Cassidy: { winRate: '49.2%', pickRate: '10.7%' },
-  'D.Va': { winRate: '47.9%', pickRate: '7%' },
-  Doomfist: { winRate: '50.8%', pickRate: '3.9%' }
-};
-
-const API_ENDPOINT = window.OVERWATCH_HERO_API_URL || '/api/heroes';
 let heroes = [...defaultHeroes];
+let selectedHeroName = null;
 
 const heroGrid = document.getElementById('heroGrid');
 const totalHeroes = document.getElementById('totalHeroes');
 const shownHeroes = document.getElementById('shownHeroes');
-const heroesWithRates = document.getElementById('heroesWithRates');
+const rateSamples = document.getElementById('rateSamples');
 const selectedHero = document.getElementById('selectedHero');
 const searchInput = document.getElementById('searchInput');
 const roleFilter = document.getElementById('roleFilter');
@@ -114,107 +40,77 @@ const cardTemplate = document.getElementById('heroCardTemplate');
 const loreName = document.getElementById('loreName');
 const loreText = document.getElementById('loreText');
 const loreMeta = document.getElementById('loreMeta');
+const loreLink = document.getElementById('loreLink');
+const returnToHero = document.getElementById('returnToHero');
 const roleChips = [...document.querySelectorAll('.chip')];
 const heroDetails = document.getElementById('heroDetails');
+const rosterStatus = document.getElementById('rosterStatus');
+const rosterStatusBadge = document.getElementById('rosterStatusBadge');
+const rosterStatusDetail = document.getElementById('rosterStatusDetail');
+const rosterTitle = document.getElementById('rosterTitle');
 
-let selectedHeroName = null;
+const verifiedDate = new Intl.DateTimeFormat('en-US', {
+  dateStyle: 'long',
+  timeZone: 'UTC'
+}).format(new Date(`${BUNDLED_ROSTER_VERIFIED}T00:00:00Z`));
 
-function toHeroSlug(heroName) {
-  return heroName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-}
-
-function findHeroBySlug(slug) {
-  return heroes.find((hero) => toHeroSlug(hero.name) === slug) || null;
+function setRosterStatus(state, label, detail) {
+  rosterStatus.dataset.state = state;
+  rosterStatus.setAttribute('aria-busy', String(state === 'loading'));
+  rosterStatusBadge.textContent = label;
+  rosterStatusDetail.textContent = detail;
 }
 
 function getHeroFromUrl() {
   const params = new URLSearchParams(window.location.search);
-  const heroSlug = params.get('hero');
-
-  return heroSlug ? findHeroBySlug(heroSlug) : null;
+  return findHeroBySlug(heroes, params.get('hero'));
 }
 
-function syncHeroToUrl(heroName) {
+function syncHeroToUrl(heroName, historyMode = 'push') {
   const url = new URL(window.location.href);
+  const nextSlug = heroName ? toHeroSlug(heroName) : null;
+  const currentSlug = url.searchParams.get('hero');
 
-  if (!heroName) {
-    url.searchParams.delete('hero');
-  } else {
-    url.searchParams.set('hero', toHeroSlug(heroName));
+  if (nextSlug === currentSlug) {
+    return;
   }
 
-  window.history.pushState({}, '', url);
+  if (nextSlug) {
+    url.searchParams.set('hero', nextSlug);
+  } else {
+    url.searchParams.delete('hero');
+  }
+
+  const method = historyMode === 'replace' ? 'replaceState' : 'pushState';
+  window.history[method]({}, '', url);
+}
+
+function getBundledHero(heroName) {
+  const heroSlug = toHeroSlug(heroName);
+  return defaultHeroes.find((hero) => toHeroSlug(hero.name) === heroSlug) || null;
+}
+
+function getRateSample(heroName) {
+  const bundledHero = getBundledHero(heroName);
+  const rateKey = bundledHero?.name;
+  return rateKey && Object.hasOwn(heroRates, rateKey) ? heroRates[rateKey] : null;
 }
 
 function syncDashboardStats() {
+  const loadedSlugs = new Set(heroes.map((hero) => toHeroSlug(hero.name)));
+  const matchingRateSamples = Object.keys(heroRates).filter((name) => {
+    return loadedSlugs.has(toHeroSlug(name));
+  }).length;
+
   totalHeroes.textContent = heroes.length;
-  heroesWithRates.textContent = Object.keys(heroRates).length;
-}
-
-function normalizeHeroRecord(hero) {
-  if (!hero || typeof hero !== 'object') {
-    return null;
-  }
-
-  const name = hero.name || hero.heroName;
-  const role = hero.role?.name || hero.role;
-  const origin = hero.origin || hero.location || hero.nationality || 'Unknown';
-
-  if (!name || !role) {
-    return null;
-  }
-
-  return {
-    name: String(name).trim(),
-    role: String(role).trim(),
-    origin: String(origin).trim()
-  };
-}
-
-async function loadHeroesFromApi() {
-  try {
-    const response = await fetch(API_ENDPOINT, {
-      headers: { Accept: 'application/json' }
-    });
-
-    if (!response.ok) {
-      throw new Error(`Hero API returned ${response.status}`);
-    }
-
-    const payload = await response.json();
-    const list = Array.isArray(payload) ? payload : payload.heroes;
-
-    if (!Array.isArray(list)) {
-      throw new Error('Hero API response was not an array.');
-    }
-
-    const nextHeroes = list.map(normalizeHeroRecord).filter(Boolean);
-
-    if (nextHeroes.length > 0) {
-      heroes = nextHeroes;
-    }
-  } catch (error) {
-    console.warn(`Falling back to bundled hero roster because ${error.message}`);
-  }
-}
-
-function sortHeroes(heroList, selectedSort) {
-  const sorted = [...heroList];
-
-  if (selectedSort === 'name-desc') {
-    sorted.sort((a, b) => b.name.localeCompare(a.name));
-  } else if (selectedSort === 'role-name') {
-    sorted.sort((a, b) => a.role.localeCompare(b.role) || a.name.localeCompare(b.name));
-  } else {
-    sorted.sort((a, b) => a.name.localeCompare(b.name));
-  }
-
-  return sorted;
+  rateSamples.textContent = matchingRateSamples;
 }
 
 function setActiveChip(roleValue) {
   roleChips.forEach((chip) => {
-    chip.classList.toggle('is-active', chip.dataset.role === roleValue);
+    const isActive = chip.dataset.role === roleValue;
+    chip.classList.toggle('is-active', isActive);
+    chip.setAttribute('aria-pressed', String(isActive));
   });
 }
 
@@ -225,120 +121,221 @@ function updateResultsSummary(count, role) {
 }
 
 function getLoreMeta(hero) {
-  const rates = heroRates[hero.name];
+  const rates = getRateSample(hero.name);
   if (!rates) {
-    return `${hero.role} • ${hero.origin} • No tracked rates yet.`;
+    return `${hero.role} • ${hero.origin} • No bundled rate sample.`;
   }
 
-  return `${hero.role} • ${hero.origin} • Win ${rates.winRate} • Pick ${rates.pickRate}`;
+  return `${hero.role} • ${hero.origin} • Sample win ${rates.winRate} • Sample pick ${rates.pickRate}`;
+}
+
+function updateSelectedCardState() {
+  const selectedSlug = selectedHeroName ? toHeroSlug(selectedHeroName) : null;
+  let selectedCardIsVisible = false;
+
+  document.querySelectorAll('.hero-card').forEach((heroCard) => {
+    const isSelected = heroCard.dataset.heroSlug === selectedSlug;
+    heroCard.classList.toggle('is-selected', isSelected);
+    selectedCardIsVisible ||= isSelected;
+
+    if (isSelected) {
+      heroCard.setAttribute('aria-current', 'true');
+    } else {
+      heroCard.removeAttribute('aria-current');
+    }
+  });
+
+  returnToHero.hidden = !selectedCardIsVisible;
+}
+
+function resetLorePanel() {
+  selectedHeroName = null;
+  selectedHero.textContent = 'None';
+  loreName.textContent = 'Select a hero';
+  loreText.textContent = 'Choose any hero card to view their lore.';
+  loreMeta.textContent = 'Role, origin, and sample performance data will appear here.';
+  loreLink.hidden = true;
+  loreLink.removeAttribute('href');
+  returnToHero.hidden = true;
+  updateSelectedCardState();
+}
+
+function clearSelection({ syncUrl = false, historyMode = 'replace' } = {}) {
+  resetLorePanel();
+
+  if (syncUrl) {
+    syncHeroToUrl(null, historyMode);
+  }
+}
+
+function restoreFocusedHero(focusedHeroSlug) {
+  if (!focusedHeroSlug) {
+    return;
+  }
+
+  const focusedCard = [...document.querySelectorAll('.hero-card')].find((card) => {
+    return card.dataset.heroSlug === focusedHeroSlug;
+  });
+
+  if (focusedCard) {
+    focusedCard.focus({ preventScroll: true });
+  } else {
+    resultsSummary.textContent +=
+      ' The previously focused hero is not available in this roster.';
+    rosterTitle.focus({ preventScroll: true });
+  }
 }
 
 function renderHeroes() {
-  const query = searchInput.value.trim().toLowerCase();
+  const focusedHeroSlug = document.activeElement?.classList.contains('hero-card')
+    ? document.activeElement.dataset.heroSlug
+    : null;
   const role = roleFilter.value;
-  const selectedSort = sortOrder.value;
-
-  const filtered = heroes.filter((hero) => {
-    const matchesRole = role === 'all' || hero.role === role;
-    const matchesQuery =
-      hero.name.toLowerCase().includes(query) ||
-      hero.role.toLowerCase().includes(query) ||
-      hero.origin.toLowerCase().includes(query);
-
-    return matchesRole && matchesQuery;
+  const filtered = filterHeroes(heroes, {
+    query: searchInput.value,
+    role
   });
-
-  const sorted = sortHeroes(filtered, selectedSort);
+  const sorted = sortHeroes(filtered, sortOrder.value);
 
   shownHeroes.textContent = sorted.length;
   selectedHero.textContent = selectedHeroName || 'None';
   updateResultsSummary(sorted.length, role);
   setActiveChip(role);
-  heroGrid.innerHTML = '';
-
-  if (selectedHeroName && !sorted.some((hero) => hero.name === selectedHeroName)) {
-    selectedHeroName = null;
-    selectedHero.textContent = 'None';
-    loreName.textContent = 'Select a hero';
-    loreText.textContent = 'Click any hero card to view their lore.';
-    loreMeta.textContent = 'Role and performance stats will appear here.';
-    syncHeroToUrl(null);
-  }
+  heroGrid.replaceChildren();
 
   if (sorted.length === 0) {
-    heroGrid.innerHTML = '<p class="empty-state">No heroes match your current filters. Try resetting or searching by role or region.</p>';
+    const emptyState = document.createElement('p');
+    emptyState.className = 'empty-state';
+    emptyState.textContent =
+      'No heroes match your current filters. Try resetting or searching by role or region.';
+    heroGrid.append(emptyState);
+    updateSelectedCardState();
+    restoreFocusedHero(focusedHeroSlug);
     return;
   }
 
   const fragment = document.createDocumentFragment();
 
   sorted.forEach((hero) => {
-    const card = cardTemplate.content.cloneNode(true);
-    const heroCard = card.querySelector('.hero-card');
+    const heroCard = cardTemplate.content.firstElementChild.cloneNode(true);
+    const rates = getRateSample(hero.name);
+
+    heroCard.dataset.heroSlug = toHeroSlug(hero.name);
     heroCard.querySelector('.hero-name').textContent = hero.name;
     heroCard.querySelector('.hero-role').textContent = hero.role;
     heroCard.querySelector('.hero-origin').textContent = `Origin: ${hero.origin}`;
-    const rates = heroRates[hero.name];
+
     const heroHint = heroCard.querySelector('.hero-hint');
-
     if (rates) {
-      heroHint.textContent = `Win: ${rates.winRate} • Pick: ${rates.pickRate}`;
+      heroHint.textContent = `Sample: ${rates.winRate} win • ${rates.pickRate} pick`;
       heroHint.classList.add('hero-hint--rates');
+    } else {
+      heroHint.textContent = 'View hero intel';
     }
 
-    heroCard.setAttribute('aria-label', `View lore for ${hero.name}`);
-
-    if (hero.name === selectedHeroName) {
-      heroCard.classList.add('is-selected');
-    }
-
-    const showLore = () => updateLorePanel(hero.name, { syncUrl: true, scrollToDetails: true });
-
-    heroCard.addEventListener('click', showLore);
-    heroCard.addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        showLore();
-      }
+    heroCard.addEventListener('click', () => {
+      updateLorePanel(hero.name, { syncUrl: true, scrollToDetails: true });
     });
 
-    fragment.append(card);
+    fragment.append(heroCard);
   });
 
   heroGrid.append(fragment);
+  updateSelectedCardState();
+  restoreFocusedHero(focusedHeroSlug);
 }
 
 function updateLorePanel(heroName, options = {}) {
-  selectedHeroName = heroName;
-  selectedHero.textContent = heroName;
-
   const hero = heroes.find((item) => item.name === heroName);
-  loreName.textContent = heroName;
-  loreText.textContent = heroLore[heroName] || 'Lore coming soon for this hero.';
-  loreMeta.textContent = hero ? getLoreMeta(hero) : 'Role and performance stats will appear here.';
+  if (!hero) {
+    clearSelection();
+    return;
+  }
+
+  selectedHeroName = hero.name;
+  const bundledHero = getBundledHero(hero.name);
+  const loreKey = bundledHero?.name;
+  selectedHero.textContent = hero.name;
+  loreName.textContent = hero.name;
+  loreText.textContent =
+    loreKey && Object.hasOwn(heroLore, loreKey)
+      ? heroLore[loreKey]
+      : 'Lore coming soon for this hero.';
+  loreMeta.textContent = getLoreMeta(hero);
+
+  if (bundledHero) {
+    loreLink.href = getOfficialHeroUrl(bundledHero.name);
+    loreLink.hidden = false;
+  } else {
+    loreLink.hidden = true;
+    loreLink.removeAttribute('href');
+  }
+
+  returnToHero.textContent = `Return to ${hero.name} in roster`;
+  updateSelectedCardState();
 
   if (options.syncUrl) {
-    syncHeroToUrl(heroName);
+    syncHeroToUrl(hero.name);
   }
 
-  if (options.scrollToDetails && heroDetails) {
-    heroDetails.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
+  if (options.scrollToDetails) {
+    if (window.matchMedia('(max-width: 820px)').matches) {
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      heroDetails.scrollIntoView({
+        behavior: reduceMotion ? 'auto' : 'smooth',
+        block: 'start'
+      });
+    }
 
-  renderHeroes();
+    loreName.focus({ preventScroll: true });
+  }
 }
 
 function resetDashboardFilters() {
   searchInput.value = '';
   roleFilter.value = 'all';
   sortOrder.value = 'name-asc';
-  selectedHeroName = null;
-  selectedHero.textContent = 'None';
-  loreName.textContent = 'Select a hero';
-  loreText.textContent = 'Click any hero card to view their lore.';
-  loreMeta.textContent = 'Role and performance stats will appear here.';
-  syncHeroToUrl(null);
+  clearSelection({ syncUrl: true, historyMode: 'push' });
   renderHeroes();
+  searchInput.focus();
+}
+
+async function refreshHeroesFromApi() {
+  setRosterStatus(
+    'loading',
+    'Refreshing roster',
+    `Showing the ${heroes.length}-hero bundled roster while the configured API responds.`
+  );
+
+  try {
+    heroes = await fetchHeroRoster(API_ENDPOINT, {
+      timeoutMs: API_TIMEOUT_MS,
+      maxHeroes: 100
+    });
+
+    syncDashboardStats();
+    renderHeroes();
+
+    const heroFromUrl = getHeroFromUrl();
+    if (heroFromUrl) {
+      updateLorePanel(heroFromUrl.name);
+    } else if (selectedHeroName && !heroes.some((hero) => hero.name === selectedHeroName)) {
+      clearSelection({ syncUrl: true, historyMode: 'replace' });
+    }
+
+    setRosterStatus(
+      'configured',
+      'Configured API roster',
+      `${heroes.length} schema-validated heroes loaded from the configured API.`
+    );
+  } catch (error) {
+    setRosterStatus(
+      'fallback',
+      'Bundled fallback',
+      `API refresh failed. Showing ${heroes.length} heroes verified ${verifiedDate}.`
+    );
+    console.warn(`Using the bundled hero roster: ${error.message}`);
+  }
 }
 
 roleChips.forEach((chip) => {
@@ -349,37 +346,59 @@ roleChips.forEach((chip) => {
 });
 
 searchInput.addEventListener('input', renderHeroes);
+searchInput.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && searchInput.value) {
+    searchInput.value = '';
+    renderHeroes();
+  }
+});
 roleFilter.addEventListener('change', renderHeroes);
 sortOrder.addEventListener('change', renderHeroes);
 resetFilters.addEventListener('click', resetDashboardFilters);
+returnToHero.addEventListener('click', () => {
+  const selectedSlug = selectedHeroName ? toHeroSlug(selectedHeroName) : null;
+  const selectedCard = [...document.querySelectorAll('.hero-card')].find((card) => {
+    return card.dataset.heroSlug === selectedSlug;
+  });
+
+  if (selectedCard) {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    selectedCard.focus({ preventScroll: true });
+    selectedCard.scrollIntoView({
+      behavior: reduceMotion ? 'auto' : 'smooth',
+      block: 'center'
+    });
+  }
+});
 
 window.addEventListener('popstate', () => {
   const heroFromUrl = getHeroFromUrl();
 
   if (heroFromUrl) {
     updateLorePanel(heroFromUrl.name);
-    return;
+  } else {
+    clearSelection();
   }
-
-  selectedHeroName = null;
-  selectedHero.textContent = 'None';
-  loreName.textContent = 'Select a hero';
-  loreText.textContent = 'Click any hero card to view their lore.';
-  loreMeta.textContent = 'Role and performance stats will appear here.';
-  renderHeroes();
 });
 
-async function initDashboard() {
-  await loadHeroesFromApi();
+function initDashboard() {
   syncDashboardStats();
+  renderHeroes();
 
   const heroFromUrl = getHeroFromUrl();
   if (heroFromUrl) {
     updateLorePanel(heroFromUrl.name);
-    return;
   }
 
-  renderHeroes();
+  if (API_ENDPOINT) {
+    void refreshHeroesFromApi();
+  } else {
+    setRosterStatus(
+      'bundled',
+      'Bundled roster',
+      `${heroes.length} heroes verified against the official roster on ${verifiedDate}.`
+    );
+  }
 }
 
 initDashboard();

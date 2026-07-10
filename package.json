@@ -1,0 +1,20 @@
+{
+  "name": "overwatch-hero-dashboard",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node --check app.js && node --check hero-api.js && node --check hero-data.js && node --check hero-utils.js && node --check playwright.config.js && node --check e2e/dashboard.spec.js",
+    "test": "npm run check && npm run test:unit",
+    "test:unit": "node --test",
+    "test:watch": "node --test --watch",
+    "test:e2e": "playwright test",
+    "test:all": "npm test && npm run test:e2e"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.1"
+  }
+}
